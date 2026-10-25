@@ -1,0 +1,91 @@
+---
+title: "SS_Ass3"
+output:
+  html_document: default
+  pdf_document: default
+date: "2023-05-14"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(kableExtra)
+library(gtExtras)
+library(gt)
+library(formattable)
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+read.csv("Massey_raw_data.csv") ->data
+data
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+data %>% 
+  filter(grepl('Waste', Area)) ->data2
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+```{r}
+options(scipen=999)
+data2 %>%
+  ggplot(aes(x=Area, y=Quantity)) + geom_col(aes(fill= Area))
+
+data2 %>% 
+  select(Business, Area, Quantity) %>%
+  filter(Quantity > 0) %>%
+  gt() %>%
+  tab_header(
+    title = "Massey Univeristy KG waste sent to landfill as at December 31 2019"
+  )
+
+data2 %>%
+  summarise(sum(Quantity))
+```
+
+
+```{r}
+read.csv("data3.csv") ->data4
+data4 %>% 
+  filter(Quantity > 0) %>%
+  select(Grouping, Quantity, Unit) %>%
+  group_by(Grouping) %>%
+  summarise(Quantity = sum(Quantity), Unit) %>%
+  filter (Unit != 'dollars')->data5
+
+
+unique(data5)->data5
+data5
+
+data5 %>%
+  ggplot(aes(x=Grouping, y = Quantity)) + geom_col(aes(fill=Unit)) +
+  theme(axis.text.x=element_text(angle=45, hjust=1))+ 
+  labs(title = "Massey University, Quantity of emission generating 'waste' by type")
+
+data5 %>%
+  formattable
+
+data5 %>%
+  ungroup(Grouping) %>%
+  select(Quantity) %>%
+  summarise(sum(Quantity))
+```
+
